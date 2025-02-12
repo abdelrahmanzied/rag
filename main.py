@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from routers.base import base_router
+from routers.data import data_router
 from dotenv import load_dotenv
 import os
 
@@ -16,3 +17,4 @@ def welcome():
     }
 
 app.include_router(base_router)
+app.include_router(data_router)
