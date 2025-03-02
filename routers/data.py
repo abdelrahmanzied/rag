@@ -6,8 +6,10 @@ import logging
 from fastapi.responses import JSONResponse
 
 from helpers.config import Settings, get_settings
-from controllers import DataController, ProjectController
-from models import ResponseSignal
+from controllers import DataController, ProjectController, ProcessController
+from models import ResponseSignal, ProcessRequest
+from langchain_community.document_loaders import TextLoader
+
 
 logger = logging.getLogger('fastapi')
 app_settings = get_settings()
@@ -20,8 +22,7 @@ data_router = APIRouter(
 @data_router.get('/health')
 async def data_health():
     return {
-        'msg': "Hello data_health",
-
+        'msg': "Hello data_router health",
     }
 
 
@@ -74,3 +75,26 @@ async def upload_file(
     #         },
     #         status_code=status.HTTP_400_BAD_REQUEST
     #     )
+
+
+@data_router.post("/process/{project_id}")
+async def process_file(
+        project_id: str,
+        request: ProcessRequest
+):
+    process_controller = ProcessController(project_id=project_id)
+    file_chunks = process_controller.process_file_content(
+        file_name=request.file_id,
+        chunk_size=request.chunk_size,
+        overlap_size=request.overlap_size
+    )
+
+    if file_chunks is None or len(file_chunks) == 0:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.FILE_PROCESSING_FAILED.value
+            }
+        )
+
+    return file_chunks

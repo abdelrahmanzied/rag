@@ -4,7 +4,7 @@ from fastapi import UploadFile
 
 from .project_controller import ProjectController
 from .base_controller import BaseController
-from models import ResponseSignal
+from models import ResponseSignal, ProcessRequest
 import re
 
 class DataController(BaseController):
